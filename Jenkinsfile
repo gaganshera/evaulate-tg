@@ -70,7 +70,7 @@ pipeline {
             stage('Docker deployment') {
                     steps {
                     echo 'Running Docker Image'
-                    bat "docker run --name c-${username}-master -d -p=${portmaster}:7100 ${registry}:${BUILD_NUMBER}"
+                    bat "docker run --name c-${username}-master -d -p=${portmaster}:7100 ${registry}:master-${BUILD_NUMBER}"
                     }
             }
             stage('Kubernetes Deployment') {
