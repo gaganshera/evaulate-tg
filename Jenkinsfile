@@ -73,6 +73,8 @@ pipeline {
             }
             stage('Kubernetes Deployment') {
                     steps {
+                    echo 'Refreshing Creds'
+                    bat 'gcloud container clusters get-credentials nagp-assignment --zone us-central1-c --project nagp-devops-assignment'
                     echo 'Deploying to Kubernetes'
                     bat 'kubectl apply -f k8s/deployment.yaml'
                     }
