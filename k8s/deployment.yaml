@@ -34,6 +34,6 @@ spec:
     app: node-app-master
   ports:
     - protocol: TCP
-      nodePort: 30158
+      nodePort: 30157
       targetPort: 7100
       port: 7100

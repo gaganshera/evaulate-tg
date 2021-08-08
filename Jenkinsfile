@@ -9,6 +9,10 @@ pipeline {
         username = 'tarungarg02'
         portmaster = 7200
         portdevelop = 7300
+        CREDENTIALS_ID = 'nagp-gcp-key'
+        LOCATION = 'us-central1-c'
+        CLUSTER_NAME = 'nagp-assignment'
+        PROJECT_ID = 'nagp-devops-assignment'
     }
     tools {
         nodejs 'nodejs'
@@ -29,14 +33,14 @@ pipeline {
                 }
             }
             stage('Unit Testing') {
-                when { branch 'master'}
+                when { branch 'master' }
                 steps {
                     // One or more steps need to be included within the steps block.
                     bat 'npm test'
                 }
             }
             stage('sonar analysis') {
-                when { branch 'develop'}
+                when { branch 'develop' }
                 steps {
                     bat '..\\..\\tools\\hudson.plugins.sonar.SonarRunnerInstallation\\SonarQubeScanner\\bin\\sonar-scanner.bat -Dsonar.host.url=http://localhost:9000 -Dsonar.login=658cd6afba259bd114439d623d10e01af79523cc'
                 }
@@ -60,7 +64,14 @@ pipeline {
                         }
                     },
                     'Pre-container check': {
-                        bat "docker rm -f c-${username}-${env.BRANCH_NAME}"
+                        script {
+                        try {
+                            bat "docker rm -f c-${username}-${env.BRANCH_NAME}"
+                            } 
+                        catch (Exception e) {
+                            echo 'No Container to remove'
+                        }
+                        }
                     }
                 )
             }
@@ -68,15 +79,20 @@ pipeline {
             stage('Docker deployment') {
                     steps {
                     echo 'Running Docker Image'
-                    bat "docker run --name c-${username}-${env.BRANCH_NAME} -d -p=${portmaster}:7100 ${registry}:${env.BRANCH_NAME}-${BUILD_NUMBER}"
+                    script {
+                    if (env.BRANCH_NAME == 'master') {
+                        bat "docker run --name c-${username}-${env.BRANCH_NAME} -d -p=${portmaster}:7100 ${registry}:${env.BRANCH_NAME}-${BUILD_NUMBER}"
+                    }
+                    else {
+                        bat "docker run --name c-${username}-${env.BRANCH_NAME} -d -p=${portdevelop}:7100 ${registry}:${env.BRANCH_NAME}-${BUILD_NUMBER}"
+                    }
+                    }
                     }
             }
             stage('Kubernetes Deployment') {
                     steps {
-                    // echo 'Refreshing Creds'
-                    // bat 'gcloud container clusters get-credentials nagp-assignment --zone us-central1-c --project nagp-devops-assignment'
                     echo 'Deploying to Kubernetes'
-                    bat 'kubectl apply -f k8s/deployment.yaml'
+                    step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'k8s/deployment.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: false])
                     }
             }
     }
