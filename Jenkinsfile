@@ -48,12 +48,12 @@ pipeline {
             stage('Containers') {
                 parallel {
                     // One or more stages need to be included within the parallel block.
-                    stage('Pre-Container Check') {
-                    steps {
-                        // bat "docker rm -f run c-tarungarg02-master"
-                        echo "IN PARALLEL"
-                    }
-                    },
+                    // stage('Pre-Container Check') {
+                    // steps {
+                    //     // bat "docker rm -f run c-tarungarg02-master"
+                    //     echo "IN PARALLEL"
+                    // }
+                    // },
                     stage('Publish to Docker Hub') {
                     steps {
                         echo 'Tagging and Moving Docker Image'
@@ -71,6 +71,12 @@ pipeline {
                     steps {
                     echo 'Running Docker Image'
                     bat "docker run --name c-${username}-master -d -p=${portmaster}:7100 ${registry}:${BUILD_NUMBER}"
+                    }
+            }
+            stage('Kubernetes Deployment') {
+                    steps {
+                    echo 'Deploying to Kubernetes'
+                    bat "kubectl apply -f k8s/deployment.yaml"
                     }
             }
     }
