@@ -5,9 +5,10 @@ pipeline {
             timeout(60)
     }
     environment {
-        registry = 'tarungarg1208/nagp-devops-assign-1'
+        registry = 'tarungarg1208/nagp-devops-assign-2'
         username = 'tarungarg02'
-        port = 7100
+        portmaster = 7200
+        portdevelop = 7300
     }
     tools {
         nodejs 'nodejs'
@@ -18,16 +19,16 @@ pipeline {
             stage('checkout') {
                 steps {
                     // One or more steps need to be included within the steps block.
-                    checkout([$class: 'GitSCM', branches: [[name: '**']], extensions: [], userRemoteConfigs: [[credentialsId: '70c8e005-4a66-4653-b36f-7cb529170c6a', url: 'https://github.com/tarungarg1208/nagp-devops-assign-1']]])
+                    checkout([$class: 'GitSCM', branches: [[name: '**']], extensions: [], userRemoteConfigs: [[credentialsId: '70c8e005-4a66-4653-b36f-7cb529170c6a', url: 'https://github.com/tarungarg1208/nagp-devops-assign-2']]])
                 }
             }
-            stage('npm install') {
+            stage('Build') {
                 steps {
                     // One or more steps need to be included within the steps block.
                     bat 'npm install'
                 }
             }
-            stage('npm test') {
+            stage('Unit Testing') {
                 steps {
                     // One or more steps need to be included within the steps block.
                     bat 'npm test'
@@ -38,25 +39,37 @@ pipeline {
                     bat '..\\..\\tools\\hudson.plugins.sonar.SonarRunnerInstallation\\SonarQubeScanner\\bin\\sonar-scanner.bat -Dsonar.host.url=http://localhost:9000 -Dsonar.login=e0dbf4fbb99dbe5b0f0900fade0aac7d1d8299ca'
                 }
             }
-            stage('docker build') {
+            stage('Docker image') {
                 steps {
                     echo 'Building Docker Image'
                     bat "docker build -t i-${username}-master ."
                 }
             }
-            stage('docker tag and push') {
-                steps {
-                    echo 'Tagging and Moving Docker Image'
-                    bat "docker tag i-${username}-master ${registry}:${BUILD_NUMBER}"
-                    withDockerRegistry([credentialsId: 'DockerHub', url:'']) {
-                        bat "docker push ${registry}:${BUILD_NUMBER}"
+            stage('Containers') {
+                parallel {
+                    // One or more stages need to be included within the parallel block.
+                    // stage('Pre-Container Check') {
+                    // steps {
+                    //     bat "docker rm -f run c-tarungarg02-master"
+                    // }
+                    // },
+                    stage('Publish to Docker Hub') {
+                    steps {
+                        echo 'Tagging and Moving Docker Image'
+                        bat "docker tag i-${username}-master ${registry}:${BUILD_NUMBER}"
+                        bat "docker tag i-${username}-master ${registry}:master-latest"
+                        withDockerRegistry([credentialsId: 'DockerHub', url:'']) {
+                            bat "docker push ${registry}:${BUILD_NUMBER}"
+                            bat "docker push ${registry}:master-latest"
+                        }
+                    }
                     }
                 }
             }
-            stage('docker run') {
+            stage('Docker deployment') {
                     steps {
                     echo 'Running Docker Image'
-                    bat "docker run --name c-${username}-master -d -p=${port}:7100 ${registry}:${BUILD_NUMBER}"
+                    bat "docker run --name c-${username}-master -d -p=${portmaster}:7100 ${registry}:${BUILD_NUMBER}"
                     }
             }
     }

@@ -1,6 +1,6 @@
 kind: Namespace
 apiVersion: v1
 metadata:
-  name: ns-tarun
+  name: kubernetes-cluster-tarungarg02 
   labels: 
-    name: ns-tarun
+    name: kubernetes-cluster-tarungarg02
