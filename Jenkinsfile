@@ -36,7 +36,7 @@ pipeline {
             }
             stage('sonar analysis') {
                 steps {
-                    bat '..\\..\\tools\\hudson.plugins.sonar.SonarRunnerInstallation\\SonarQubeScanner\\bin\\sonar-scanner.bat -Dsonar.host.url=http://localhost:9000 -Dsonar.login=e0dbf4fbb99dbe5b0f0900fade0aac7d1d8299ca'
+                    bat '..\\..\\tools\\hudson.plugins.sonar.SonarRunnerInstallation\\SonarQubeScanner\\bin\\sonar-scanner.bat -Dsonar.host.url=http://localhost:9000 -Dsonar.login=658cd6afba259bd114439d623d10e01af79523cc'
                 }
             }
             stage('Docker image') {
