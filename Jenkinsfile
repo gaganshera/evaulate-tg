@@ -42,41 +42,37 @@ pipeline {
             stage('Docker image') {
                 steps {
                     echo 'Building Docker Image'
-                    bat "docker build -t i-${username}-master ."
+                    bat "docker build -t i-${username}-${env.BRANCH_NAME} ."
                 }
             }
             stage('Containers') {
-                parallel {
-                    // One or more stages need to be included within the parallel block.
-                    // stage('Pre-Container Check') {
-                    // steps {
-                    //     // bat "docker rm -f run c-tarungarg02-master"
-                    //     echo "IN PARALLEL"
-                    // }
-                    // },
-                    stage('Publish to Docker Hub') {
-                    steps {
+            steps {
+                parallel(
+                    'Publish to Docker Hub': {
                         echo 'Tagging and Moving Docker Image'
-                        bat "docker tag i-${username}-master ${registry}:master-${BUILD_NUMBER}"
-                        bat "docker tag i-${username}-master ${registry}:master-latest"
+                        bat "docker tag i-${username}-${env.BRANCH_NAME} ${registry}:${env.BRANCH_NAME}-${BUILD_NUMBER}"
+                        bat "docker tag i-${username}-${env.BRANCH_NAME} ${registry}:${env.BRANCH_NAME}-latest"
                         withDockerRegistry([credentialsId: 'DockerHub', url:'']) {
-                            bat "docker push ${registry}:master-${BUILD_NUMBER}"
-                            bat "docker push ${registry}:master-latest"
+                            bat "docker push ${registry}:${env.BRANCH_NAME}-${BUILD_NUMBER}"
+                            bat "docker push ${registry}:${env.BRANCH_NAME}-latest"
                         }
+                    },
+                    'Pre-container check': {
+                        bat "docker rm -f c-${username}-${env.BRANCH_NAME}"
                     }
-                    }
-                }
+                )
+            }
             }
             stage('Docker deployment') {
                     steps {
                     echo 'Running Docker Image'
-                    bat "docker run --name c-${username}-master -d -p=${portmaster}:7100 ${registry}:master-${BUILD_NUMBER}"
+                    bat "docker run --name c-${username}-${env.BRANCH_NAME} -d -p=${portmaster}:7100 ${registry}:${env.BRANCH_NAME}-${BUILD_NUMBER}"
                     }
             }
             stage('Kubernetes Deployment') {
                     steps {
                     echo 'Deploying to Kubernetes'
-                    bat "kubectl apply -f k8s/deployment.yaml"
+                    bat 'kubectl apply -f k8s/deployment.yaml'
                     }
             }
     }
