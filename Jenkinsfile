@@ -29,12 +29,14 @@ pipeline {
                 }
             }
             stage('Unit Testing') {
+                when { branch 'master'}
                 steps {
                     // One or more steps need to be included within the steps block.
                     bat 'npm test'
                 }
             }
             stage('sonar analysis') {
+                when { branch 'develop'}
                 steps {
                     bat '..\\..\\tools\\hudson.plugins.sonar.SonarRunnerInstallation\\SonarQubeScanner\\bin\\sonar-scanner.bat -Dsonar.host.url=http://localhost:9000 -Dsonar.login=658cd6afba259bd114439d623d10e01af79523cc'
                 }
