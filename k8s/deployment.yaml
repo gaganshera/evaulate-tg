@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: node-app-deployment-develop
+  name: node-app-deployment-master
   namespace: kubernetes-cluster-tarungarg02
   labels:
-    app: node-app-develop
+    app: node-app-master
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: node-app-develop
+      app: node-app-master
   template:
     metadata:
       labels:
-        app: node-app-develop
+        app: node-app-master
     spec:
       containers:
-        - name: node-app-develop
-          image: tarungarg1208/nagp-devops-assign-2:develop-latest
+        - name: node-app-master
+          image: tarungarg1208/nagp-devops-assign-2:master-latest
           ports:
             - name: http
               containerPort: 7100
@@ -26,12 +26,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: node-app-service-develop
+  name: node-app-service-master
   namespace: kubernetes-cluster-tarungarg02
 spec:
   type: NodePort
   selector: 
-    app: node-app-develop
+    app: node-app-master
   ports:
     - protocol: TCP
       nodePort: 30158
