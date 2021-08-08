@@ -48,18 +48,19 @@ pipeline {
             stage('Containers') {
                 parallel {
                     // One or more stages need to be included within the parallel block.
-                    // stage('Pre-Container Check') {
-                    // steps {
-                    //     bat "docker rm -f run c-tarungarg02-master"
-                    // }
-                    // },
+                    stage('Pre-Container Check') {
+                    steps {
+                        // bat "docker rm -f run c-tarungarg02-master"
+                        echo "IN PARALLEL"
+                    }
+                    },
                     stage('Publish to Docker Hub') {
                     steps {
                         echo 'Tagging and Moving Docker Image'
-                        bat "docker tag i-${username}-master ${registry}:${BUILD_NUMBER}"
+                        bat "docker tag i-${username}-master ${registry}:master-${BUILD_NUMBER}"
                         bat "docker tag i-${username}-master ${registry}:master-latest"
                         withDockerRegistry([credentialsId: 'DockerHub', url:'']) {
-                            bat "docker push ${registry}:${BUILD_NUMBER}"
+                            bat "docker push ${registry}:master-${BUILD_NUMBER}"
                             bat "docker push ${registry}:master-latest"
                         }
                     }
