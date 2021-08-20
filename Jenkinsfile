@@ -43,7 +43,7 @@ pipeline {
             stage('sonar analysis') {
                 when { branch 'develop' }
                 steps {
-                    sh '${scannerHome}/bin/sonar-scanner -Dsonar.host.url=http://localhost:9000 -Dsonar.login=658cd6afba259bd114439d623d10e01af79523cc'
+                    sh '${scannerHome}/bin/sonar-scanner -Dsonar.login=658cd6afba259bd114439d623d10e01af79523cc'
                 }
             }
             stage('Docker image') {
