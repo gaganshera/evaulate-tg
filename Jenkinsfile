@@ -17,7 +17,6 @@ pipeline {
     }
     tools {
         nodejs 'nodejs'
-        jdk 'Java'
         dockerTool 'Test_Docker'
     }
     stages {
