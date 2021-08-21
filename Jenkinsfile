@@ -43,7 +43,9 @@ pipeline {
             stage('sonar analysis') {
                 when { branch 'develop' }
                 steps {
-                    sh '${scannerHome}/bin/sonar-scanner'
+                    withSonarQubeEnv('SonarQube') {
+                        sh '${scannerHome}/bin/sonar-scanner'
+                    }
                 }
             }
             stage('Docker image') {
