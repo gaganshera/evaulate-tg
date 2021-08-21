@@ -98,7 +98,7 @@ pipeline {
                     steps {
                     echo 'Deploying to Kubernetes'
                     // step([$class: 'KubernetesEngineBuilder', projectId: env.PROJECT_ID, clusterName: env.CLUSTER_NAME, location: env.LOCATION, manifestPattern: 'k8s/deployment.yaml', credentialsId: env.CREDENTIALS_ID, verifyDeployments: false])
-                    sh "kubectl apply -f deployment.yaml"
+                    sh "kubectl apply -f k8s/deployment.yaml"
                     }
             }
     }
